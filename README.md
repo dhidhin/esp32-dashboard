@@ -9,6 +9,15 @@
 </p>
 
 <p align="center">
+  <a href="https://esp32-dashboard-nu.vercel.app/" target="_blank">
+    <img src="https://img.shields.io/badge/Live%20Demo-Vercel-black?style=for-the-badge&logo=vercel" alt="Live Demo" />
+  </a>
+  <a href="https://wokwi.com/projects/477206242817367041" target="_blank">
+    <img src="https://img.shields.io/badge/Wokwi-IoT%20Simulation-00B4D8?style=for-the-badge&logo=espressif" alt="Wokwi Simulation" />
+  </a>
+</p>
+
+<p align="center">
   <a href="https://github.com/dhidhin/esp32-dashboard/actions/workflows/ci.yml">
     <img src="https://img.shields.io/badge/CI-Passing-brightgreen?style=flat-square&logo=githubactions" alt="CI Status" />
   </a>
@@ -31,24 +40,45 @@
 
 ---
 
+## 🔗 Live Demo & Simulasi Interaktif
+
+Anda dapat mencoba ekosistem IoT ini langsung dari browser tanpa perlu menyiapkan perangkat keras fisik:
+
+| Layanan | Tautan Akses | Deskripsi |
+| :--- | :--- | :--- |
+| 🌐 **Live Web Dashboard** | **[esp32-dashboard-nu.vercel.app](https://esp32-dashboard-nu.vercel.app/)** | Dashboard frontend monitoring suhu & kelembapan real-time yang dihosting di Vercel. |
+| ⚡ **Simulasi Hardware (Wokwi)** | **[Proyek Wokwi ESP32 + API](https://wokwi.com/projects/477206242817367041)** | Simulasi sirkuit virtual ESP32 + DHT22 + LCD 16x2 + Buzzer yang langsung terhubung ke database Supabase. |
+
+> ### 💡 Cara Menguji Real-Time Secara Langsung:
+> 1. Buka [Simulasi Wokwi](https://wokwi.com/projects/477206242817367041) di satu jendela browser, lalu klik tombol **Play / Start Simulation**.
+> 2. Buka [Web Dashboard](https://esp32-dashboard-nu.vercel.app/) di jendela browser lain atau perangkat ponsel.
+> 3. Klik sensor **DHT22** di Wokwi dan geser slider suhu / kelembapan.
+> 4. Perhatikan dashboard web: nilai suhu, kartu status, dan grafik akan langsung berubah secara real-time via WebSocket tanpa perlu me-refresh halaman!
+> 5. *(Bonus)* Coba atur suhu di Wokwi hingga **$\ge 50^\circ\text{C}$**: alarm buzzer akan otomatis berbunyi dan LCD menampilkan indikator `!ALR` (*Overheat Alert*).
+
+---
+
 ## 📌 Ringkasan Proyek
 
-**ESP32 IoT Monitoring Dashboard** adalah aplikasi web monitoring IoT real-time modern yang menampilkan pembacaan sensor suhu dan kelembapan dari mikrokontroler **ESP32** (menggunakan sensor **DHT22** / **DHT11**).
+**ESP32 IoT Monitoring Dashboard** adalah sistem IoT terintegrasi untuk pemantauan suhu dan kelembapan secara langsung (*real-time*). Proyek ini menggabungkan perangkat keras mikrokontroler **ESP32**, basis data cloud **Supabase (PostgreSQL)**, dan antarmuka web modern berbasis **React 19** dan **Vite**.
 
-Data dikirimkan oleh ESP32 melalui REST API ke basis data **Supabase (PostgreSQL)**, kemudian disiarkan langsung (*pushed*) ke dashboard React melalui **Supabase Realtime WebSockets** tanpa perlu melakukan reload halaman (*no polling*).
+Data sensor dikirim secara periodik oleh ESP32 melalui HTTPS POST REST API ke Supabase. Perubahan data (*insert*) secara otomatis dipancarkan ke browser klien menggunakan **Supabase Realtime WebSockets** (Change Data Capture / CDC), menghasilkan pengalaman monitoring yang mulus dan minim latensi.
 
 ---
 
 ## ✨ Fitur Utama
 
-- ⚡ **Pembaruan Real-Time (WebSockets)**: Data baru dari ESP32 langsung muncul di dashboard secara instan menggunakan Supabase Realtime channel.
-- 📊 **Kartu Statistik Interaktif**:
-  - **Suhu (°C)** dengan label status otomatis (*Dingin*, *Normal*, *Hangat*, *Panas*).
-  - **Kelembapan (%)** dengan status otomatis (*Kering*, *Normal*, *Lembap*).
-  - **Status ESP32**: Indikator *ONLINE / OFFLINE* dinamis berdasarkan *heartbeat* waktu pembaruan terakhir (< 60 detik).
-- 📈 **Grafik Interaktif Recharts**: Visualisasi garis tren suhu dan kelembapan untuk 30 pembacaan data terakhir.
-- 📋 **Tabel Riwayat Data**: Menampilkan 10 log data sensor terbaru lengkap dengan format waktu lokal Indonesia.
-- 🎨 **Tampilan Responsif & Modern**: Desain antarmuka bersih, cepat, dan nyaman diakses baik dari desktop maupun smartphone.
+- ⚡ **Pembaruan Data Real-Time**: Integrasi WebSocket melalui Supabase Realtime channel (`sensor-readings-realtime`).
+- 📊 **Kartu Statistik Dinamis**:
+  - **Suhu (°C)** dengan label status otomatis (*Dingin* < 20°C, *Normal* < 30°C, *Hangat* < 35°C, *Panas* $\ge$ 35°C).
+  - **Kelembapan (%)** dengan indikator kenyamanan (*Kering* < 40%, *Normal* $\le$ 70%, *Lembap* > 70%).
+  - **Indikator Online / Offline**: Menghitung waktu *heartbeat* sejak pembacaan terakhir (< 60 detik = Online).
+- 📈 **Grafik Tren Interaktif (Recharts)**: Menampilkan visualisasi garis multi-parameter untuk 30 pembacaan terakhir.
+- 📋 **Tabel Log Sensor**: Riwayat 10 pembacaan terbaru dengan format waktu lokal Indonesia.
+- 🚨 **Sistem Alarm Hardware (Wokwi / ESP32)**:
+  - Layar LCD 16x2 I2C menampilkan pembacaan lokal.
+  - Buzzer berbunyi otomatis saat suhu terdeteksi ekstrem ($\ge 50^\circ\text{C}$).
+- 📱 **Antarmuka Responsif & Modern**: Tampilan ramah pengguna pada layar desktop, tablet, maupun smartphone.
 
 ---
 
@@ -56,45 +86,68 @@ Data dikirimkan oleh ESP32 melalui REST API ke basis data **Supabase (PostgreSQL
 
 ```mermaid
 flowchart LR
-    A["ESP32 + DHT22"] -->|"HTTPS POST (JSON)"| B["Supabase REST API"]
-    B --> C[("Supabase PostgreSQL Database")]
-    C -->|"PostgreSQL CDC (Realtime)"| D["Supabase Realtime Engine"]
-    D -->|"WebSocket Channel"| E["React 19 Dashboard (Vite)"]
+    subgraph Edge ["Hardware / Simulasi IoT"]
+        A["ESP32 DevKit V4"]
+        B["Sensor DHT22"]
+        C["LCD 16x2 I2C"]
+        D["Buzzer Alarm (>= 50°C)"]
+        B --> A
+        A --> C
+        A --> D
+    end
+
+    subgraph Cloud ["Supabase Cloud Backend"]
+        E["Supabase REST API"]
+        F[("PostgreSQL Database\n(table: sensor_readings)")]
+        G["Supabase Realtime Engine\n(WebSockets)"]
+        E --> F
+        F --> G
+    end
+
+    subgraph Client ["Frontend Web Application"]
+        H["React 19 + Recharts Dashboard\n(Vercel Hosting)"]
+    end
+
+    A -->|"HTTPS POST (JSON Payload)"| E
+    G -->|"WebSocket CDC Stream"| H
 ```
 
 ---
 
 ## 🛠️ Komponen Hardware & Rangkaian
 
-### Komponen yang Dibutuhkan:
-1. **ESP32 Development Board** (NodeMCU-32S / ESP-WROOM-32).
-2. **Sensor DHT22 / AM2302** (atau DHT11).
-3. **Resistor 10kΩ** (sebagai *pull-up*, opsional jika modul sensor sudah terpasang resistor bawaan).
-4. **Kabel Jumper** (Male to Female / Male to Male).
-5. **Kabel Micro-USB / Type-C** untuk flashing & daya ESP32.
+### Komponen:
+1. **ESP32 Development Board** (NodeMCU-32S / ESP32 DevKit C V4)
+2. **Sensor Suhu & Kelembapan DHT22** (AM2302)
+3. **Display LCD 1602** dengan modul I2C Backpack
+4. **Active Buzzer** (sebagai alarm *overheat*)
+5. **Kabel Jumper & Breadboard**
 
 ### Skema Pinout:
 
-| Pin Sensor DHT22 | Pin ESP32 | Keterangan |
-| :--- | :--- | :--- |
-| **VCC** | **3V3** atau **VIN (5V)** | Sumber daya sensor |
-| **DATA** | **GPIO 4** | Jalur sinyal data sensor |
-| **GND** | **GND** | Ground bersama |
+| Komponen | Pin Modul | Pin ESP32 | Keterangan |
+| :--- | :--- | :--- | :--- |
+| **DHT22** | **VCC** | **3V3** | Daya 3.3V sensor |
+| | **DATA / SDA** | **GPIO 13** | Jalur sinyal data sensor |
+| | **GND** | **GND** | Ground |
+| **LCD 1602 I2C** | **VCC** | **VIN / 5V** | Daya modul LCD |
+| | **GND** | **GND** | Ground |
+| | **SDA** | **GPIO 21** | Jalur Data I2C |
+| | **SCL** | **GPIO 22** | Jalur Clock I2C |
+| **Buzzer** | **Positif (+)** | **GPIO 14** | Sinyal kendali alarm |
+| | **Negatif (-)** | **GND** | Ground |
 
-> 📁 Kode firmware ESP32 siap pakai tersedia pada direktori [`firmware/esp32_dht22.ino`](firmware/esp32_dht22.ino).
+> 📁 Skrip firmware lengkap tersedia di [`firmware/esp32_dht22.ino`](firmware/esp32_dht22.ino) atau jalankan langsung di [Simulasi Wokwi](https://wokwi.com/projects/477206242817367041).
 
 ---
 
 ## 🗄️ Konfigurasi Database Supabase
 
-Sebelum menjalankan aplikasi, siapkan tabel dan kebijakan akses di Supabase:
-
 1. Buka [Supabase Dashboard](https://supabase.com/dashboard) dan buat proyek baru.
-2. Buka menu **SQL Editor**.
-3. Jalankan skrip SQL yang ada pada file [`supabase/schema.sql`](supabase/schema.sql):
+2. Buka menu **SQL Editor**, salin dan jalankan skrip dari file [`supabase/schema.sql`](supabase/schema.sql):
 
 ```sql
--- Buat tabel sensor_readings
+-- 1. Buat tabel sensor_readings
 CREATE TABLE IF NOT EXISTS public.sensor_readings (
     id BIGINT GENERATED BY DEFAULT AS IDENTITY PRIMARY KEY,
     suhu NUMERIC(5, 2) NOT NULL,
@@ -102,11 +155,11 @@ CREATE TABLE IF NOT EXISTS public.sensor_readings (
     created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );
 
--- Index created_at
+-- 2. Buat index performa
 CREATE INDEX IF NOT EXISTS idx_sensor_readings_created_at_desc 
 ON public.sensor_readings (created_at DESC);
 
--- Aktifkan RLS dan Kebijakan Akses
+-- 3. Konfigurasi Row Level Security (RLS)
 ALTER TABLE public.sensor_readings ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Allow public read access"
@@ -115,18 +168,17 @@ ON public.sensor_readings FOR SELECT TO anon, authenticated USING (true);
 CREATE POLICY "Allow public insert access"
 ON public.sensor_readings FOR INSERT TO anon, authenticated WITH CHECK (true);
 
--- Aktifkan Supabase Realtime
+-- 4. Aktifkan Supabase Realtime publication
 ALTER PUBLICATION supabase_realtime ADD TABLE public.sensor_readings;
 ```
 
 ---
 
-## 🚀 Panduan Memulai (Instalasi & Penggunaan)
+## 🚀 Panduan Menjalankan Frontend Secara Lokal
 
 ### 1. Prasyarat
-- [Node.js](https://nodejs.org/) versi 18 atau lebih baru.
-- Akun [Supabase](https://supabase.com).
-- [Arduino IDE](https://www.arduino.cc/en/software) untuk mengunggah program ke ESP32.
+- [Node.js](https://nodejs.org/) (versi 18 ke atas)
+- NPM atau PNPM
 
 ### 2. Clone Repositori
 ```bash
@@ -139,28 +191,28 @@ cd esp32-dashboard
 npm install
 ```
 
-### 4. Konfigurasi Environment Variables
-Salin file `.env.example` menjadi `.env`:
+### 4. Konfigurasi Variabel Lingkungan
+Salin file template `.env.example`:
 ```bash
 cp .env.example .env
 ```
-Buka file `.env` dan masukkan kredensial Supabase Anda:
+Isi variabel dengan URL dan Anon Key proyek Supabase Anda:
 ```env
 VITE_SUPABASE_URL=https://your-project-id.supabase.co
 VITE_SUPABASE_ANON_KEY=your_supabase_anon_key_here
 ```
 
-### 5. Jalankan Aplikasi di Mode Development
+### 5. Jalankan Local Development Server
 ```bash
 npm run dev
 ```
-Akses dashboard di browser melalui URL yang tampil pada terminal (biasanya `http://localhost:5173`).
+Buka browser pada alamat `http://localhost:5173`.
 
-### 6. Build untuk Mode Produksi
+### 6. Build untuk Produksi
 ```bash
 npm run build
 ```
-Hasil build akan tersimpan di dalam folder `dist/` dan siap di-deploy ke Vercel, Netlify, atau GitHub Pages.
+Folder hasil build `dist/` siap untuk di-deploy ke hosting statis pilihan Anda (Vercel, Netlify, Cloudflare Pages, dsb).
 
 ---
 
@@ -176,55 +228,53 @@ esp32-dashboard/
 │   │   └── feature_request.md   # Template permintaan fitur baru
 │   └── pull_request_template.md # Template Pull Request
 ├── firmware/
-│   └── esp32_dht22.ino          # Skrip program Arduino/ESP32
+│   └── esp32_dht22.ino          # Skrip ESP32 + DHT22 + LCD I2C + Buzzer (Wokwi-compatible)
 ├── public/
-│   ├── favicon.svg              # Ikon dashboard
-│   └── icons.svg                # Sprite SVG icons
+│   ├── favicon.svg              # Favicon dashboard
+│   └── icons.svg                # Icon sprite SVG
 ├── src/
-│   ├── assets/                  # Aset gambar & ilustrasi
+│   ├── assets/                  # File aset gambar
 │   ├── lib/
-│   │   └── supabase.js          # Inisialisasi Supabase Client
+│   │   └── supabase.js          # Inisialisasi Supabase client
 │   ├── App.css                  # Styling dashboard
-│   ├── App.jsx                  # Komponen utama dashboard IoT
-│   ├── index.css                # Global styling & reset
+│   ├── App.jsx                  # Logika & komponen dashboard
+│   ├── index.css                # Styling global
 │   └── main.jsx                 # Entry point React
 ├── supabase/
-│   └── schema.sql               # Skrip SQL tabel, RLS & Realtime
-├── .env.example                 # Template variabel lingkungan
-├── .gitignore                   # Konfigurasi file yang diabaikan git
+│   └── schema.sql               # Skrip skema database, RLS, & Realtime
+├── .env.example                 # Contoh variabel lingkungan
+├── .gitignore                   # Daftar file yang diabaikan Git
 ├── CONTRIBUTING.md              # Panduan kontribusi
-├── LICENSE                      # Lisensi proyek (MIT)
-├── package.json                 # Metadata & dependensi proyek
+├── LICENSE                      # Lisensi MIT
+├── package.json                 # Konfigurasi dependensi & npm scripts
 └── README.md                    # Dokumentasi utama proyek
 ```
 
 ---
 
-## 🧰 Skrip yang Tersedia
+## 🧰 Skrip Perintah (NPM Scripts)
 
-Di dalam file `package.json`, terdapat skrip-skrip berikut yang dapat dijalankan:
-
-| Perintah | Fungsi |
+| Perintah | Keterangan |
 | :--- | :--- |
-| `npm run dev` | Menjalankan server pengembangan Vite lokal dengan Hot Module Replacement (HMR). |
-| `npm run build` | Melakukan proses kompilasi & optimasi kode ke folder `dist` untuk kebutuhan produksi. |
-| `npm run lint` | Menjalankan [oxlint](https://oxc.rs) untuk memeriksa kualitas dan standar kode. |
-| `npm run preview` | Menjalankan pratinjau hasil build lokal sebelum diunggah ke server hosting. |
+| `npm run dev` | Menjalankan server lokal Vite dengan Hot Module Replacement (HMR). |
+| `npm run build` | Mengompilasi dan mengoptimasi aplikasi web ke folder `dist/`. |
+| `npm run lint` | Menjalankan [oxlint](https://oxc.rs) untuk audit kualitas kode. |
+| `npm run preview` | Menjalankan pratinjau lokal dari hasil kompilasi folder `dist/`. |
 
 ---
 
 ## 🤝 Kontribusi
 
-Kontribusi selalu diterima dengan senang hati! Silakan pelajari panduan kontribusi di [CONTRIBUTING.md](CONTRIBUTING.md) sebelum membuka Pull Request.
+Tertarik menambahkan fitur atau memperbaiki bug? Silakan baca panduan lengkap pada [CONTRIBUTING.md](CONTRIBUTING.md) sebelum membuat Pull Request.
 
 ---
 
 ## 📜 Lisensi
 
-Proyek ini dilisensikan di bawah lisensi **MIT** - lihat file [LICENSE](LICENSE) untuk informasi selengkapnya.
+Proyek ini berada di bawah naungan lisensi **MIT**. Rincian lengkap dapat dibaca pada file [LICENSE](LICENSE).
 
 ---
 
 <p align="center">
-  Dibuat dengan ❤️ oleh <a href="https://github.com/dhidhin"><b>Dhidhin</b></a> &middot; XII RPL
+  Dibuat dengan ❤️ oleh <a href="https://github.com/dhidhin"><b>Dhidhin Haris</b></a> &middot; XII RPL
 </p>
