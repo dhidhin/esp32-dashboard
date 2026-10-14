@@ -246,7 +246,7 @@ function App() {
                     stroke="#ef4444"
                     strokeWidth={3}
                     dot={false}
-                  />
+                  /> 
 
                   <Line
                     type="monotone"
